@@ -1,0 +1,12 @@
+{
+  "recommendations": [
+    "vscode-icons-team.vscode-icons",
+    "editorconfig.editorconfig",
+    "ms-dotnettools.csdevkit",
+    "vscode.makefile-tools",
+    "davidanson.vscode-markdownlint",
+    "redhat.vscode-yaml",
+    "ms-azuretools.vscode-docker"
+  ],
+  "unwantedRecommendations": []
+}
