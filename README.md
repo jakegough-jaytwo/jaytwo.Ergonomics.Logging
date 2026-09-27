@@ -202,7 +202,7 @@ Stamp correlation (`operation_id`) on each event with `WithField`. Hold that id 
 
 Expose `Action<LogBuilder>? extraConfig = null` on every `LogXxx` method and call `.WithExtraConfig(extraConfig)` last before the level helper. Forward it from the public API if hosts should add per-event fields without forking. If you do not forward it, hosts still compose via `BeginFieldScope`.
 
-Gate secrets (bodies, tokens, SQL, PII, parameter values) behind a host-supplied flag. Default to off, hashed, or omitted. A data access library gating SQL text and parameter values behind an explicit mode is the same idea.
+Gate secrets (bodies, tokens, PII, parameter values) behind a host-supplied flag; default to off or omitted. Full payloads such as SQL belong on fields only when the host opts in — a short hash of a large string can still be useful for grouping, but a non-cryptographic hash is not a security control and must not be sold as one.
 
 The pattern is the same for HTTP, queues, caches, or ADO. Prefix the catalog so names do not collide (`HTTP:`, `JOB:`, `DB:`).
 

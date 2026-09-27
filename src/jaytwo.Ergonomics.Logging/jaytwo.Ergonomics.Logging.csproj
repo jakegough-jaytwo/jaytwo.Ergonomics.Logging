@@ -28,7 +28,7 @@
 
   <ItemGroup>
     <PackageReference Include="jaytwo.TimeExpression" Version="0.1.0-beta-20251101211754" />
-    <PackageReference Include="jaytwo.StableHashing" Version="0.1.0-beta-20260915080614" />
+    <PackageReference Include="jaytwo.StableHashing" Version="0.1.0-beta-20260927074007" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
