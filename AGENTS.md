@@ -28,7 +28,7 @@ Consumers (jaytwo.Ergonomics.Ado is the first) are not the product. Do not let a
 - Event methods that format, hash, or run `extraConfig` must guard with `IsEnabled`.
 - Keep the three channels distinct: message template / `AppendFieldToMessage`; `WithField` (this event, structured-only, not in the text); `Scope` / `BeginScope` (ambient `using`-block; MEL scopes are factory-global).
 - Do not implement per-event properties (`operation_id`, `query_text`) as `EventLogger.Scope` or a MEL `BeginScope` around a library operation.
-- Duration formatting (`FormatTimePretty` / `FormatTimeSeconds`) stays on `EventLogger`.
+- Duration formatting (`FormatTimePretty` / `FormatTimeSeconds`) and byte formatting (`FormatBytesPretty`) stay on `EventLogger`. `Bytes/GoHumanize` stays `internal` until it is extracted into its own package (see `src/jaytwo.Ergonomics.Logging/Bytes/README.md`).
 - Field bags last-win on duplicate keys.
 - Prefer `WithExtraConfig` as the extension hook.
 - Pair `EventLogger` methods with a named `EventId` catalog as described in the README. Create catalog entries with `EventLogger.EventIdFromName` (jaytwo.StableHashing). Do not emit library events through ad-hoc `logger.BuildMessage`. Do not hand-number `EventId.Id`.

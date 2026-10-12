@@ -42,6 +42,34 @@ public class EventLoggerTests
     }
 
     [Fact]
+    public void FormatBytesPretty_returns_iec_strings()
+    {
+        // Arrange
+        var eventLogger = new TestEventLogger(new CapturingLogger());
+
+        // Act
+        var pretty = eventLogger.FormatBytesPretty(55210L);
+        var prettyNullable = eventLogger.FormatBytesPretty((long?)55210L);
+
+        // Assert
+        Assert.Equal("54 KiB", pretty);
+        Assert.Equal(pretty, prettyNullable);
+    }
+
+    [Fact]
+    public void FormatBytesPretty_returns_null_for_null_nullable_bytes()
+    {
+        // Arrange
+        var eventLogger = new TestEventLogger(new CapturingLogger());
+
+        // Act
+        var pretty = eventLogger.FormatBytesPretty((long?)null);
+
+        // Assert
+        Assert.Null(pretty);
+    }
+
+    [Fact]
     public void Scope_returns_null_when_logger_is_null()
     {
         // Arrange

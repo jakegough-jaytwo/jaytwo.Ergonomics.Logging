@@ -49,7 +49,7 @@ It is not a logging framework. It does not replace `ILogger`, invent a backend, 
 
 - A thin API on `ILogger`: `BuildMessage` / `LogBuilder`, `BuildScope` / `ScopeBuilder`, `BeginFieldScope` overloads, and `EventLogger`
 - For library authors first: a null `ILogger` is a no-op; `EventLogger.IsEnabled` is the guard before formatting, hashing, or `extraConfig`
-- Opinionated about how events look: named `EventId` from `EventLogger.EventIdFromName` (stable xxHash3 via jaytwo.StableHashing), `[{event_name}]` prefix, last-win field bags, `WithExtraConfig` as the extension hook, Go-style pretty time and decimal seconds
+- Opinionated about how events look: named `EventId` from `EventLogger.EventIdFromName` (stable xxHash3 via jaytwo.StableHashing), `[{event_name}]` prefix, last-win field bags, `WithExtraConfig` as the extension hook, Go-style pretty time and decimal seconds, Go-style (go-humanize `IBytes`) byte counts
 - Explicit about three channels:
   1. Message template and `AppendFieldToMessage` — human-readable line plus structured placeholders
   2. `WithField` — this event only, structured, not in the text
@@ -296,6 +296,8 @@ Other suffixes stay consistent the same way (`query_text_hash`).
 | --- | --- | --- |
 | Human duration | message placeholder + `FormatTimePretty` | `{elapsed_time}`, `{lifetime}` |
 | Queryable duration | `WithField` + `FormatTimeSeconds` | `elapsed_time_seconds`, `lifetime_seconds` |
+| Human byte count | message placeholder + `FormatBytesPretty` | `{bytes_read_pretty}` |
+| Queryable byte count | `WithField`, raw number | `bytes_read`, `content_length` |
 | Correlation | `WithField` on every event | `operation_id` |
 | Queryable extras | `WithField` | `http_host`, `query_text`, `query_text_hash` |
 | Value in the sentence and on the log record | placeholder, or `AppendFieldToMessage` | `http_method`, `attempt`, `row_count` |
@@ -318,6 +320,9 @@ Do not stamp `operation_id` (or the equivalent) with `EventLogger.Scope`. MEL sc
 
 > [!NOTE]
 > **Duration helpers.** Durations always go through this pair. `FormatTimePretty` is Go compact (`12.3ms`, `1m30s`) and belongs in the sentence (`{elapsed_time}`, `{lifetime}`). `FormatTimeSeconds` is a culture-invariant decimal seconds string (`0.0123`, `90.5`) and belongs on `WithField` as `elapsed_time_seconds` / `lifetime_seconds`. Standardize on `_seconds`. Do not add `_ms` next to `_seconds` in the same catalog (or on the same event). Do not log a raw `TimeSpan` (its default `ToString()` is not the convention). Do not put the pretty string on the field channel if you want something sortable. Nullable overloads return `null`. Both methods are `virtual` if a subclass needs a different clock face; keep the pair (human vs queryable seconds).
+
+> [!NOTE]
+> **Byte helper.** `FormatBytesPretty` matches go-humanize `IBytes` exactly, the way `FormatTimePretty` matches Go's `time.Duration`: IEC units (`KiB`, never an ambiguous `K` or `KB`), base 1024, two significant digits (`512 B`, `1.5 KiB`, `54 KiB`, `1.0 MiB`). It belongs in the sentence. The field keeps the raw `long` (`bytes_read = 55210`). Give the placeholder a different name from the field (`{bytes_read_pretty}` vs `bytes_read`): placeholder names become properties on the log record, and a matching name would put a string where queries expect a number. Nullable overload returns `null`; `virtual` if a subclass wants another convention. The reasoning behind it, and the plan for splitting it into its own package, are in [src/jaytwo.Ergonomics.Logging/Bytes/README.md](src/jaytwo.Ergonomics.Logging/Bytes/README.md).
 
 > [!NOTE]
 > **Named holes, positional values.** `ILogger.Log(template, args)` does not match `{elapsed_time}` to a parameter named `elapsed_time`. Holes are filled **in order**: the first `{...}` in the final template gets `args[0]`, the second gets `args[1]`. The names are for the provider. Serilog, OpenTelemetry, and JSON formatters use them as property names on the log record. The console formatter uses them only to print the line.

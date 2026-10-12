@@ -1,4 +1,5 @@
 using System;
+using jaytwo.Ergonomics.Logging.Bytes;
 using jaytwo.StableHashing;
 using jaytwo.TimeExpression.Golang;
 using jaytwo.TimeExpression.Seconds;
@@ -19,7 +20,7 @@ namespace jaytwo.Ergonomics.Logging;
 /// when logging is off. Pair methods with canonical events as described in the
 /// package README. The base class also provides <see cref="EventIdFromName"/>
 /// (stable xxHash via jaytwo.StableHashing) and helpers for formatting
-/// <see cref="TimeSpan"/> values in human-readable form.
+/// <see cref="TimeSpan"/> values and byte counts in human-readable form.
 /// </remarks>
 public abstract class EventLogger
 {
@@ -106,6 +107,18 @@ public abstract class EventLogger
     /// or returns <c>null</c> if the value is <c>null</c>.
     /// </summary>
     public virtual string? FormatTimeSeconds(TimeSpan? duration) => ExactSeconds.ToString(duration);
+
+    /// <summary>
+    /// Formats a byte count the way go-humanize <c>IBytes</c> does (e.g. <c>512 B</c>, <c>1.5 KiB</c>, <c>54 KiB</c>):
+    /// IEC units, base 1024, two significant digits.
+    /// </summary>
+    public virtual string FormatBytesPretty(long bytes) => GoHumanize.IBytes(bytes);
+
+    /// <summary>
+    /// Formats a nullable byte count the way go-humanize <c>IBytes</c> does,
+    /// or returns <c>null</c> if the value is <c>null</c>.
+    /// </summary>
+    public virtual string? FormatBytesPretty(long? bytes) => bytes is null ? null : FormatBytesPretty(bytes.Value);
 
     /// <summary>
     /// Creates a <see cref="LogBuilder"/> pre-configured with the event name prefix
