@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using jaytwo.Ergonomics.Logging.Bytes;
 using jaytwo.StableHashing;
 using jaytwo.TimeExpression.Golang;
@@ -119,6 +120,19 @@ public abstract class EventLogger
     /// or returns <c>null</c> if the value is <c>null</c>.
     /// </summary>
     public virtual string? FormatBytesPretty(long? bytes) => bytes is null ? null : FormatBytesPretty(bytes.Value);
+
+    /// <summary>
+    /// Formats a count the way go-humanize <c>Comma</c> does (e.g. <c>1,234</c>, <c>-1,234</c>):
+    /// invariant thousands separators.
+    /// </summary>
+    // Invariant so log lines read the same regardless of host culture.
+    public virtual string FormatCountPretty(long count) => count.ToString("N0", CultureInfo.InvariantCulture);
+
+    /// <summary>
+    /// Formats a nullable count the way go-humanize <c>Comma</c> does,
+    /// or returns <c>null</c> if the value is <c>null</c>.
+    /// </summary>
+    public virtual string? FormatCountPretty(long? count) => count is null ? null : FormatCountPretty(count.Value);
 
     /// <summary>
     /// Creates a <see cref="LogBuilder"/> pre-configured with the event name prefix

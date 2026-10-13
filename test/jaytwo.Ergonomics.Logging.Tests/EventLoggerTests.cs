@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using Microsoft.Extensions.Logging;
 using Xunit;
 
@@ -64,6 +65,63 @@ public class EventLoggerTests
 
         // Act
         var pretty = eventLogger.FormatBytesPretty((long?)null);
+
+        // Assert
+        Assert.Null(pretty);
+    }
+
+    [Fact]
+    public void FormatCountPretty_returns_grouped_strings()
+    {
+        // Arrange
+        var eventLogger = new TestEventLogger(new CapturingLogger());
+
+        // Act
+        var pretty = eventLogger.FormatCountPretty(1234567L);
+        var prettyNullable = eventLogger.FormatCountPretty((long?)1234567L);
+        var small = eventLogger.FormatCountPretty(42L);
+        var negative = eventLogger.FormatCountPretty(-1234L);
+        var min = eventLogger.FormatCountPretty(long.MinValue);
+
+        // Assert
+        Assert.Equal("1,234,567", pretty);
+        Assert.Equal(pretty, prettyNullable);
+        Assert.Equal("42", small);
+        Assert.Equal("-1,234", negative);
+        Assert.Equal("-9,223,372,036,854,775,808", min);
+    }
+
+    [Fact]
+    public void FormatCountPretty_ignores_current_culture()
+    {
+        // Arrange
+        var eventLogger = new TestEventLogger(new CapturingLogger());
+        var originalCulture = CultureInfo.CurrentCulture;
+
+        // Act
+        string pretty;
+        try
+        {
+            CultureInfo.CurrentCulture = new CultureInfo("de-DE");
+            pretty = eventLogger.FormatCountPretty(1234567L);
+        }
+        finally
+        {
+            CultureInfo.CurrentCulture = originalCulture;
+        }
+
+        // Assert
+        Assert.Equal("1,234,567", pretty);
+    }
+
+    [Fact]
+    public void FormatCountPretty_returns_null_for_null_nullable_count()
+    {
+        // Arrange
+        var eventLogger = new TestEventLogger(new CapturingLogger());
+
+        // Act
+        var pretty = eventLogger.FormatCountPretty((long?)null);
 
         // Assert
         Assert.Null(pretty);
